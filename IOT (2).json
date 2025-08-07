@@ -1,0 +1,303 @@
+{
+  "name": "IOT",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -832,
+        -256
+      ],
+      "id": "cc543971-09af-455e-8faa-1b598081a096",
+      "name": "When chat message received",
+      "webhookId": "e90d4a86-6c0e-459c-8e5b-3694b189fd5c"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "87740901-24d2-4ec8-87b1-d636435f1d47",
+              "leftValue": "={{ $json.chatInput }}",
+              "rightValue": "light",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -432,
+        -64
+      ],
+      "id": "b880852c-8761-4754-8d81-7826c211e248",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "topic": "smartpass/to-device/9C9E6E0738A8",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mqtt",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        192
+      ],
+      "id": "70bc4324-49f5-4fac-ac74-c58215c32b65",
+      "name": "MQTT",
+      "credentials": {
+        "mqtt": {
+          "id": "WEubINOZdYVj5zdj",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "topics": "smartpass/from-device/9C9E6E0738A8",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mqttTrigger",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -336
+      ],
+      "id": "f85893c5-fb7f-47cb-a88d-bb9454748e29",
+      "name": "MQTT Trigger",
+      "credentials": {
+        "mqtt": {
+          "id": "WEubINOZdYVj5zdj",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatid }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        -112
+      ],
+      "id": "935b7f38-f817-49ce-a0ec-00cf727849fc",
+      "name": "Send a text message",
+      "webhookId": "91429e1d-bbbe-4fbd-bbe4-8f4b2141669f",
+      "credentials": {
+        "telegramApi": {
+          "id": "gFUy7hQRrZHkfFwQ",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Parse the raw sensor message from chat\nconst rawMessage = $json.message || \"{}\";\n\nlet data;\ntry {\n  data = JSON.parse(rawMessage);\n} catch (e) {\n  return [\n    {\n      json: {\n        message: \"❌ Invalid sensor data format. Please send valid JSON.\"\n      }\n    }\n  ];\n}\n\n// 2. Extract MAC ID from topic (if available)\nconst topic = $json.topic || \"\";\nconst macMatch = topic.match(/from-device\\/([A-F0-9]+)/i);\nconst mac_id = macMatch ? macMatch[1] : \"UNKNOWN_MAC\";\n\n// 3. Round the values\nconst temperature = parseFloat(data.temperature || 0).toFixed(2);\nconst humidity = parseFloat(data.humidity || 0).toFixed(2);\n\n// 4. Compose the chat message\nconst chatMessage = `📡 Device ${mac_id} reports:\\n🌡️ Temperature: ${temperature}°C\\n💧 Humidity: ${humidity}%`;\n\nreturn [\n  {\n    json: {\n      chatid: 7603498943,\n      message: chatMessage\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        -352
+      ],
+      "id": "53623ef2-87df-4bb2-b5ba-18be0b50882f",
+      "name": "MQTT Response"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputText = $json.chatInput || \"\";\n\nlet status = \"\";\nlet name = \"\";\n\n// Normalize text\nconst lowerText = inputText.toLowerCase();\n\n// Determine status\nif (lowerText.includes(\"turn on\")) {\n  status = \"ON\";\n} else if (lowerText.includes(\"turn off\")) {\n  status = \"OFF\";\n}\n\n// Remove command part to extract device name\nname = inputText.replace(/turn (on|off)/i, \"\").trim();\n\n// Fix common typos (optional)\nname = name.replace(/lifgt/i, \"light\");\n\n// Capitalize each word in name\nname = name\n  .split(\" \")\n  .map(word => word.charAt(0).toUpperCase() + word.slice(1))\n  .join(\" \");\n\n// Return JSON\n\nreturn [\n  {\n    json: {\n      chatid: 7603498943,\n      message: `The ${name} is ${status}`\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -64,
+        -80
+      ],
+      "id": "c851afd9-a6f7-457b-bf78-22dbe02e7264",
+      "name": "Turn on Status"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputText = $json.chatInput || \"\";\nconst lowerText = inputText.toLowerCase();\n\n// Define MAC address (replace with real MAC or pull from another field)\nconst mac = \"9C9E6E0738A8\";\n\n// Default states\nlet relay1 = \"OFF\";\nlet relay2 = \"OFF\";\n\n// ON command triggers\nconst isOnCommand = /(turn|set|switch|open|activate|enable)/.test(lowerText);\n\n// OFF command triggers (optional)\nconst isOffCommand = /(turn|set|switch|close|deactivate|disable).*(off)/.test(lowerText);\n\n// Detect specific relay mentions\nconst mentionsRelay1 = /relay1|first/.test(lowerText);\nconst mentionsRelay2 = /relay2|second/.test(lowerText);\nconst mentionsBoth = /2 relay|both relays|both/.test(lowerText);\n\n// Apply logic\nif (isOnCommand) {\n  if (mentionsBoth || (!mentionsRelay1 && !mentionsRelay2)) {\n    // No specific relay mentioned → default to both ON\n    relay1 = \"ON\";\n    relay2 = \"ON\";\n  } else {\n    if (mentionsRelay1) relay1 = \"ON\";\n    if (mentionsRelay2) relay2 = \"ON\";\n  }\n} else if (isOffCommand) {\n  if (mentionsBoth || (!mentionsRelay1 && !mentionsRelay2)) {\n    relay1 = \"OFF\";\n    relay2 = \"OFF\";\n  } else {\n    if (mentionsRelay1) relay1 = \"OFF\";\n    if (mentionsRelay2) relay2 = \"OFF\";\n  }\n}\n\n// Final payload\nconst payload = {\n  message_id: `${Date.now()}`,\n  message_type: \"device_control\",\n  mac_id: mac,\n  relay1: relay1,\n  relay2: relay2\n};\n\nreturn [\n  {\n    json: payload\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        192
+      ],
+      "id": "4d786514-0f02-4996-98ba-fb2e791baf66",
+      "name": "Door"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get relay state from input\nconst relay1 = $json.relay1 || \"OFF\";\nconst mac_id = $json.mac_id || \"UNKNOWN\";\n\n// Interpret relay state\nlet doorStatus = \"\";\n\nif (relay1 === \"ON\") {\n  doorStatus = \"🚪 Door is open\";\n} else if (relay1 === \"OFF\") {\n  doorStatus = \"🔒 Door is closed\";\n} else {\n  doorStatus = \"❓ Door state unknown\";\n}\n\n// Optionally include device info\nconst message = `Device ${mac_id} status:\\n${doorStatus}`;\n\nreturn [\n  {\n    json: {\n      chatid: 7603498943,\n      message: message\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        192
+      ],
+      "id": "fe9fb13e-bb07-4f59-8c70-0b1f08b77d47",
+      "name": "Door Response"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "6b8825c2-939c-46d4-8a77-59e460521d03",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        48
+      ],
+      "id": "c7e28740-0997-4b7f-abcf-138c830f9776",
+      "name": "Webhook",
+      "webhookId": "6b8825c2-939c-46d4-8a77-59e460521d03"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Turn on Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Door",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MQTT Trigger": {
+      "main": [
+        [
+          {
+            "node": "MQTT Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MQTT": {
+      "main": [
+        [
+          {
+            "node": "Door Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MQTT Response": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Turn on Status": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Door": {
+      "main": [
+        [
+          {
+            "node": "MQTT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Door Response": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "832a3123-411c-4b3c-8e36-9ad367b115bd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "df9c93544a88371d5dbe2da23e64eab6282876da055cafeedff230161e855085"
+  },
+  "id": "yyME2QVU3UCDJSKi",
+  "tags": []
+}
