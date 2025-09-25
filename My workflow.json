@@ -1,5 +1,5 @@
 {
-  "name": "My workflow",
+  "name": "IOT",
   "nodes": [
     {
       "parameters": {
@@ -10,7 +10,7 @@
       "typeVersion": 1.1,
       "position": [
         -848,
-        128
+        0
       ],
       "id": "6334c82e-9f7c-4d93-b0ea-d0f1e3d0f19a",
       "name": "When chat message received",
@@ -43,22 +43,22 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -448,
-        288
+        -624,
+        96
       ],
       "id": "9c8b4d17-1a48-41d7-8432-430f2b85d892",
       "name": "If"
     },
     {
       "parameters": {
-        "topic": "smartpass/to-device/9C9E6E0738A8",
+        "topic": "smartpass/to-device/9C9E6E068B74",
         "options": {}
       },
       "type": "n8n-nodes-base.mqtt",
       "typeVersion": 1,
       "position": [
-        -32,
-        544
+        -176,
+        192
       ],
       "id": "f61e1154-e2a4-42d5-ac4e-09a0840ad56a",
       "name": "MQTT",
@@ -71,14 +71,14 @@
     },
     {
       "parameters": {
-        "topics": "smartpass/from-device/9C9E6E0738A8",
+        "topics": "smartpass/from-device/9C9E6E068B74",
         "options": {}
       },
       "type": "n8n-nodes-base.mqttTrigger",
       "typeVersion": 1,
       "position": [
-        -448,
-        0
+        -176,
+        384
       ],
       "id": "ad3e2691-4b3d-4cfb-8ac8-01b9575073d8",
       "name": "MQTT Trigger",
@@ -98,8 +98,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        944,
-        272
+        672,
+        192
       ],
       "id": "e3146da7-15a1-446f-8343-0f8016ab047a",
       "name": "Send a text message",
@@ -118,8 +118,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -48,
-        0
+        48,
+        384
       ],
       "id": "31b84f19-66f3-4a42-8c9d-bbd943da2af2",
       "name": "MQTT Response"
@@ -131,8 +131,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -48,
-        272
+        48,
+        0
       ],
       "id": "8c1d6e48-bccd-40bf-98f0-609922d1c325",
       "name": "Turn on Status"
@@ -144,8 +144,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -240,
-        544
+        -400,
+        192
       ],
       "id": "edb86bf2-f7f1-4539-a19a-6b4025e87dd3",
       "name": "Door"
@@ -157,8 +157,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        208,
-        544
+        48,
+        192
       ],
       "id": "a1dd3a36-12e3-48f5-836c-9f0dfa81c8c0",
       "name": "Door Response"
@@ -173,7 +173,7 @@
       "typeVersion": 2,
       "position": [
         -848,
-        448
+        192
       ],
       "id": "4230c942-239a-47f3-9325-5b5029686e7b",
       "name": "Webhook",
@@ -188,8 +188,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.1,
       "position": [
-        560,
-        272
+        272,
+        192
       ],
       "id": "84795472-ad5e-4767-8df2-0b22baf5c95c",
       "name": "AI Agent"
@@ -202,8 +202,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
       "typeVersion": 1,
       "position": [
-        560,
-        480
+        304,
+        416
       ],
       "id": "237eb85e-3d7c-4697-a95b-ac57418e16c1",
       "name": "Azure OpenAI Chat Model",
@@ -222,8 +222,8 @@
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
       "position": [
-        688,
-        480
+        432,
+        416
       ],
       "id": "28c863c9-2a73-4945-8fc5-c4f9e05956a8",
       "name": "Simple Memory"
@@ -378,9 +378,10 @@
   },
   "active": false,
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "3c5c6f92-c92a-48be-9ced-1b603b9121f9",
+  "versionId": "1cba8f22-5607-4715-89aa-2918ad82ee74",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "5704f9fa0792b5a77941ad71ddc175ff84a7cc9a1efc4dc7280bfb034439d2ea"
